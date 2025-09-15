@@ -16,7 +16,7 @@ if errorlevel 1 (
 )
 
 REM Verificar si el archivo principal existe
-if not exist "lightbot_game.py" (
+if not exist "lightbot.py" (
     echo ERROR: No se encuentra el archivo lightbot_game.py
     echo Asegurate de que este archivo .bat este en la misma carpeta que el juego.
     pause
@@ -29,7 +29,7 @@ echo Presiona Ctrl+C para salir en cualquier momento.
 echo.
 
 REM Ejecutar el juego
-python lightbot_game.py
+python lightbot.py
 
 REM Pausar al finalizar
 echo.
