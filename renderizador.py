@@ -107,6 +107,11 @@ class Renderizador:
         print(f"  {self.simbolos['robot']} = Robot")
         print(f"  {self.simbolos['robot_on_light']} = Robot en luz encendida")
         print()
+        print("Comandos de movimiento:")
+        print("  1 = ARRIBA, 2 = ABAJO, 3 = IZQUIERDA, 4 = DERECHA, 5 = ENCENDER")
+        print()
+
+
 
     def mostrar_solucion(self, camino, nombre_algoritmo=""):
         """Muestra la solucion encontrada"""
@@ -119,12 +124,7 @@ class Renderizador:
         else:
             print("Solucion encontrada:")
         
-        # Mostrar como secuencia con flechas
-        secuencia_solucion = " → ".join(camino)
-        print(f"  {secuencia_solucion}")
-        print()
-        
-        # Mostrar paso a paso
+        # Mostrar paso a paso (sin la secuencia con flechas)
         for i, paso in enumerate(camino, 1):
             print(f"  {i}. {paso}")
         print()
@@ -159,48 +159,100 @@ class Renderizador:
         
         return luces_apagadas + distancia_minima
 
+    def _obtener_descripcion_movimientos(self, visited_nodes):
+        """Genera una descripción de los movimientos realizados"""
+        if not visited_nodes:
+            return "No hay movimientos para analizar"
+        
+        # Solo mostrar el coste total
+        coste_total = visited_nodes[-1].cost if visited_nodes else 0
+        return f"Coste total: {coste_total}"
+
     def mostrar_estadisticas(self, resultado_astar, resultado_bfs):
         """Muestra las estadisticas de comparacion"""
         print("\n" + "="*60)
         print("COMPARACION DE ALGORITMOS")
         print("="*60)
         print()
+        
         print("A* (Heuristica - Algoritmo Informado):")
         print(f"  Nodos explorados: {resultado_astar['nodes_explored']}")
         print(f"  Pasos solucion: {resultado_astar['steps']}")
         print(f"  Tiempo: {resultado_astar['execution_time']:.2f}ms")
         print()
+        
+        # Mostrar descripción de movimientos para A*
+        if resultado_astar['visited_nodes']:
+            descripcion = self._obtener_descripcion_movimientos(resultado_astar['visited_nodes'])
+            print(f"  {descripcion}")
+            print()
+
+        
+        self.mostrar_solucion(resultado_astar['path'], "A*")
+        
         print("BFS (Busqueda Ciega - Sin informacion):")
         print(f"  Nodos explorados: {resultado_bfs['nodes_explored']}")
         print(f"  Pasos solucion: {resultado_bfs['steps']}")
         print(f"  Tiempo: {resultado_bfs['execution_time']:.2f}ms")
+        
+        # Mostrar descripción de movimientos para BFS
+        if resultado_bfs['visited_nodes']:
+            descripcion = self._obtener_descripcion_movimientos(resultado_bfs['visited_nodes'])
+            print(f"  {descripcion}")
+            print()
+        
+        self.mostrar_solucion(resultado_bfs['path'], "BFS")
         print()
     
         if resultado_astar['success'] and resultado_bfs['success']:
             print("=== ANALISIS DE EFICIENCIA ===")
-            eficiencia_nodos = ((resultado_bfs['nodes_explored'] - resultado_astar['nodes_explored']) / resultado_bfs['nodes_explored']) * 100
-        
-            # Evitar division por cero en tiempo
-            if resultado_bfs['execution_time'] > 0 and resultado_astar['execution_time'] > 0:
-                eficiencia_tiempo = ((resultado_bfs['execution_time'] - resultado_astar['execution_time']) / resultado_bfs['execution_time']) * 100
+            print()
+            
+            # Cálculo de eficiencia en nodos
+            nodos_astar = resultado_astar['nodes_explored']
+            nodos_bfs = resultado_bfs['nodes_explored']
+            
+            if nodos_bfs > 0:
+                eficiencia_nodos = ((nodos_bfs - nodos_astar) / nodos_bfs) * 100
                 print(f"A* exploro {eficiencia_nodos:.1f}% menos nodos que BFS")
-                if eficiencia_tiempo > 0:
+            else:
+                print("No se puede calcular eficiencia en nodos (división por cero)")
+            
+            # Cálculo de eficiencia en tiempo
+            tiempo_astar = resultado_astar['execution_time']
+            tiempo_bfs = resultado_bfs['execution_time']
+            
+            if tiempo_bfs > 0 and tiempo_astar > 0:
+                if tiempo_bfs > tiempo_astar:
+                    # A* es más rápido
+                    eficiencia_tiempo = ((tiempo_bfs - tiempo_astar) / tiempo_bfs) * 100
                     print(f"A* fue {eficiencia_tiempo:.1f}% mas rapido que BFS")
                 else:
-                    print(f"BFS fue {abs(eficiencia_tiempo):.1f}% mas rapido que A*")
+                    # BFS es más rápido
+                    eficiencia_tiempo = ((tiempo_astar - tiempo_bfs) / tiempo_astar) * 100
+                    print(f"BFS fue {eficiencia_tiempo:.1f}% mas rapido que A*")
             else:
-                print(f"A* exploro {eficiencia_nodos:.1f}% menos nodos que BFS")
                 print("El tiempo de ejecucion es muy rapido para comparar")
-        
-        print("\n" + "="*60)
-        print("CAMINOS SOLUCION")
-        print("="*60)
-        
-        if resultado_astar['success']:
-            self.mostrar_solucion(resultado_astar['path'], "A*")
-        
-        if resultado_bfs['success']:
-            self.mostrar_solucion(resultado_bfs['path'], "BFS")
+            
+            print()
+            
+            # Mostrar fórmulas de cálculo
+            print("Evaluación por nodos: ", end="")
+            if nodos_bfs > 0:
+                print(f"(({nodos_bfs} - {nodos_astar}) / {nodos_bfs}) * 100 = {eficiencia_nodos:.1f}%")
+            else:
+                print("No aplicable")
+            
+            print("Evaluación por tiempo: ", end="")
+            if tiempo_bfs > 0 and tiempo_astar > 0:
+                if tiempo_bfs > tiempo_astar:
+                    print(f"(({tiempo_bfs:.2f} - {tiempo_astar:.2f}) / {tiempo_bfs:.2f}) * 100 = {eficiencia_tiempo:.1f}%")
+                else:
+                    print(f"(({tiempo_astar:.2f} - {tiempo_bfs:.2f}) / {tiempo_astar:.2f}) * 100 = {eficiencia_tiempo:.1f}%")
+            else:
+                print("No aplicable")
+            
+            print()
 
     def evaluar_solucion_usuario(self, nivel, robot_start, camino_usuario):
         """Evalua si la solucion del usuario es correcta"""

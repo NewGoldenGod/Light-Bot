@@ -1,11 +1,17 @@
 """
 Juego LightBot
 """
+import os
+import time
 from estado import EstadoJuego
 from renderizador import Renderizador
 from a_estrella import AEstrella
 from bfs import BusquedaAnchura
 from niveles import get_level
+
+def clearconsole():
+    """Clear the console screen"""
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 class LightBot:
     def __init__(self):
@@ -15,6 +21,7 @@ class LightBot:
 
     def jugar(self):
         """Inicia el juego principal"""
+        clearconsole()
         print("LIGHTBOT")
         print("=" * 50)
         
@@ -44,6 +51,7 @@ class LightBot:
 
     def _mostrar_instrucciones(self):
         """Muestra las instrucciones del juego"""
+        clearconsole()
         print("\n" + "=" * 60)
         print("INSTRUCCIONES")
         print("=" * 60)
@@ -60,16 +68,23 @@ class LightBot:
         print("Si el movimiento choca con un obstaculo, el robot no se mueve.")
         print()
         input("Presiona ENTER para volver al menu principal...")
+        clearconsole()
 
     def _jugar(self):
         """Modo donde el usuario juega"""
+        clearconsole()
         print("\nMODO DE JUEGO - Ingresa tu solucion")
         print("=" * 50)
         
-        # Seleccionar nivel
+        # Seleccionar nivel con nuevo formato
+        print("DIFICULTAD DEL JUEGO")
+        print("1. Fácil")
+        print("2. Medio")
+        print("3. Difícil")
+        
         while True:
             try:
-                nivel_num = int(input("Selecciona nivel (1-3): "))
+                nivel_num = int(input("Elige tu dificultad (1-3): "))
                 if 1 <= nivel_num <= 3:
                     break
                 else:
@@ -81,6 +96,7 @@ class LightBot:
         robot_x, robot_y = nivel['robot_start']
         
         # Mostrar el problema completo
+        clearconsole()
         print("\n" + "="*60)
         print("PROBLEMA A RESOLVER")
         print("="*60)
@@ -92,14 +108,22 @@ class LightBot:
         print("  3 = IZQUIERDA")
         print("  4 = DERECHA")
         print("  5 = ENCENDER")
+        print("  0 = TERMINAR")
         print()
         
-        # Solicitar solucion del usuario
+        # Solicitar solucion del usuario con visualización en tiempo real
         camino_usuario = []
-        print("Ingresa tu solucion paso a paso (escribe '0' para terminar):")
+        estado_actual = EstadoJuego(nivel['grid'], robot_x, robot_y)
+        nodo_actual = estado_actual.get_initial_node()
+        
+        print("Ingresa tu solucion paso a paso:")
         
         while True:
-            paso = input(f"Paso {len(camino_usuario) + 1}: ").strip()
+            clearconsole()
+            print(f"Paso actual: {len(camino_usuario)}")
+            self.renderizador.render_level(nivel, nodo_actual.x, nodo_actual.y, nodo_actual.lights)
+            
+            paso = input("Siguiente comando (1-5, 0 para terminar): ").strip()
             
             if paso == '0':
                 break
@@ -112,23 +136,57 @@ class LightBot:
                     '4': 'DERECHA',
                     '5': 'ENCENDER'
                 }
-                camino_usuario.append(acciones[paso])
-                print(f"  Agregado: {acciones[paso]}")
+                accion = acciones[paso]
+                
+                # Ejecutar la acción
+                sucesores = estado_actual.get_successors(nodo_actual)
+                siguiente = None
+                
+                for suc in sucesores:
+                    if suc.action == accion:
+                        siguiente = suc
+                        break
+                
+                if siguiente:
+                    nodo_actual = siguiente
+                    camino_usuario.append(accion)
+                    print(f"Ejecutado: {accion}")
+                    time.sleep(0.5)
+                else:
+                    print("Movimiento no válido. Intenta otro comando.")
+                    time.sleep(1)
             else:
-                print("  Comando invalido. Usa: 1, 2, 3, 4, 5, 0")
+                print("Comando inválido. Usa: 1, 2, 3, 4, 5, 0")
+                time.sleep(1)
         
         if not camino_usuario:
             print("No ingresaste ninguna solucion.")
             return
         
         # Evaluar la solucion del usuario
-        es_correcto, pasos_usuario = self.renderizador.evaluar_solucion_usuario(
-            nivel, (robot_x, robot_y), camino_usuario
-        )
+        es_correcto = estado_actual.is_goal(nodo_actual)
+        pasos_usuario = len(camino_usuario)
+        
+        clearconsole()
+        print("\n" + "="*60)
+        print("EVALUANDO TU SOLUCION")
+        print("="*60)
+        
+        print(f"Secuencia ingresada: {' → '.join(camino_usuario)}")
+        print(f"Total de pasos: {pasos_usuario}")
+        
+        if es_correcto:
+            print(f"\n¡SOLUCION CORRECTA! Todas las luces encendidas en {pasos_usuario} pasos")
+        else:
+            luces_encendidas = sum(nodo_actual.lights)
+            total_luces = len(nodo_actual.lights)
+            print(f"\nSolucion incompleta. Luces encendidas: {luces_encendidas}/{total_luces}")
         
         input("\nPresiona ENTER para ver las soluciones de los algoritmos...")
         
         # Resolver con algoritmos
+        clearconsole()
+        print("Resolviendo con algoritmos...")
         estado_juego = EstadoJuego(nivel['grid'], robot_x, robot_y)
         
         resolver_astar = AEstrella(estado_juego)
@@ -138,21 +196,22 @@ class LightBot:
         resultado_bfs = resolver_bfs.resolver()
         
         # Mostrar comparacion incluyendo solucion del usuario
+        clearconsole()
         print("\n" + "="*60)
         print("COMPARACION COMPLETA")
         print("="*60)
         print()
         print("Tu solucion:")
-        print(f"  Pasos: {pasos_usuario}")
-        print(f"  Correcta: {'Si' if es_correcto else 'No'}")
+        print(f"Pasos: {pasos_usuario}")
+        print(f"Correcta: {'Si' if es_correcto else 'No'}")
         print()
-        
-        # Mostrar explicacion de la heuristica
-        nodo_inicial = estado_juego.get_initial_node()
-        self.renderizador.mostrar_explicacion_heuristica(nodo_inicial, estado_juego.light_positions)
         
         # Mostrar resultados de algoritmos
         self.renderizador.mostrar_estadisticas(resultado_astar, resultado_bfs)
+        
+        # Mostrar explicacion de la heuristica al final
+        nodo_inicial = estado_juego.get_initial_node()
+        self.renderizador.mostrar_explicacion_heuristica(nodo_inicial, estado_juego.light_positions)
         
         if es_correcto and resultado_astar['success']:
             pasos_optimos = resultado_astar['steps']
@@ -165,6 +224,8 @@ class LightBot:
         jugar_de_nuevo = input("\n¿Deseas jugar de nuevo? (s/n): ").strip().lower()
         if jugar_de_nuevo == 's':
             self._jugar()
+        else:
+            clearconsole()
 
 def main():
     """Funcion principal"""
