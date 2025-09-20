@@ -8,89 +8,89 @@ class Renderizador:
             0: '.',  # Piso normal
             1: '#',  # Obstaculo
             2: 'L',  # Luz apagada
-            'light_on': 'O',  # Luz encendida
+            'luz_encendida': 'O',  # Luz encendida
             'robot': 'R',     # Robot
-            'robot_on_light': '@'  # Robot en luz encendida
+            'robot_en_luz': '@'  # Robot en luz encendida
         }
 
     # Renderiza el nivel en consola
-    def render_level(self, nivel, robot_x, robot_y, light_states=None):
-        grid = nivel['grid']
-        filas = len(grid)
-        columnas = len(grid[0])
+    def renderizar_nivel(self, nivel, robot_x, robot_y, estados_luces=None):
+        cuadricula = nivel['cuadricula']
+        filas = len(cuadricula)
+        columnas = len(cuadricula[0])
         
-        if light_states is None:
-            light_count = self._contar_luces(grid)
-            light_states = [0] * light_count
+        if estados_luces is None:
+            cantidad_luces = self._contar_luces(cuadricula)
+            estados_luces = [0] * cantidad_luces
         
-        print(f"\n=== {nivel['name']} ===")
-        print(f"Descripcion: {nivel['description']}")
+        print(f"\n=== {nivel['nombre']} ===")
+        print(f"Descripcion: {nivel['descripcion']}")
         print()
         
         # Crear representacion visual
-        display_grid = []
+        cuadricula_mostrar = []
         for i in range(filas):
             fila = []
             for j in range(columnas):
-                celda = self._get_cell_symbol(grid[i][j], i, j, robot_x, robot_y, light_states, grid)
+                celda = self._obtener_simbolo_celda(cuadricula[i][j], i, j, robot_x, robot_y, estados_luces, cuadricula)
                 fila.append(celda)
-            display_grid.append(fila)
+            cuadricula_mostrar.append(fila)
         
         # Mostrar el tablero
-        for fila in display_grid:
+        for fila in cuadricula_mostrar:
             print(' '.join(f'{celda:^3}' for celda in fila))
         
         print()
         self._mostrar_leyenda()
 
     # Obtiene el simbolo adecuado para una celda
-    def _get_cell_symbol(self, cell_type, row, col, robot_x, robot_y, light_states, grid):
-        if row == robot_x and col == robot_y:
-            if cell_type == 2:
-                light_index = self._get_light_index(row, col, grid)
-                if light_index is not None and light_states[light_index] == 1:
-                    return self.simbolos['robot_on_light']
+    def _obtener_simbolo_celda(self, tipo_celda, fila, col, robot_x, robot_y, estados_luces, cuadricula):
+        if fila == robot_x and col == robot_y:
+            if tipo_celda == 2:
+                indice_luz = self._obtener_indice_luz(fila, col, cuadricula)
+                if indice_luz is not None and estados_luces[indice_luz] == 1:
+                    return self.simbolos['robot_en_luz']
                 else:
                     return self.simbolos['robot']
             else:
                 return self.simbolos['robot']
         else:
-            if cell_type == 0:
+            if tipo_celda == 0:
                 return self.simbolos[0]
-            elif cell_type == 1:
+            elif tipo_celda == 1:
                 return self.simbolos[1]
-            elif cell_type == 2:
-                light_index = self._get_light_index(row, col, grid)
-                if light_index is not None and light_states[light_index] == 1:
-                    return self.simbolos['light_on']
+            elif tipo_celda == 2:
+                indice_luz = self._obtener_indice_luz(fila, col, cuadricula)
+                if indice_luz is not None and estados_luces[indice_luz] == 1:
+                    return self.simbolos['luz_encendida']
                 else:
                     return self.simbolos[2]
 
     # Obtiene el indice de la luz en la lista de estados
-    def _get_light_index(self, row, col, grid):
-        light_positions = self._get_light_positions(grid)
-        for i, (lx, ly) in enumerate(light_positions):
-            if lx == row and ly == col:
+    def _obtener_indice_luz(self, fila, col, cuadricula):
+        posiciones_luces = self._obtener_posiciones_luces(cuadricula)
+        for i, (lx, ly) in enumerate(posiciones_luces):
+            if lx == fila and ly == col:
                 return i
         return None
 
     # Obtiene las posiciones de todas las luces en el nivel
-    def _get_light_positions(self, grid):
-        positions = []
-        for i in range(len(grid)):
-            for j in range(len(grid[0])):
-                if grid[i][j] == 2:
-                    positions.append((i, j))
-        return positions
+    def _obtener_posiciones_luces(self, cuadricula):
+        posiciones = []
+        for i in range(len(cuadricula)):
+            for j in range(len(cuadricula[0])):
+                if cuadricula[i][j] == 2:
+                    posiciones.append((i, j))
+        return posiciones
 
     # Cuenta cuantas luces hay en el nivel
-    def _contar_luces(self, grid):
-        count = 0
-        for i in range(len(grid)):
-            for j in range(len(grid[0])):
-                if grid[i][j] == 2:
-                    count += 1
-        return count
+    def _contar_luces(self, cuadricula):
+        contador = 0
+        for i in range(len(cuadricula)):
+            for j in range(len(cuadricula[0])):
+                if cuadricula[i][j] == 2:
+                    contador += 1
+        return contador
 
     # Muestra la leyenda de simbolos
     def _mostrar_leyenda(self):
@@ -98,9 +98,9 @@ class Renderizador:
         print(f"  {self.simbolos[0]} = Piso normal")
         print(f"  {self.simbolos[1]} = Obstaculo")
         print(f"  {self.simbolos[2]} = Luz apagada")
-        print(f"  {self.simbolos['light_on']} = Luz encendida")
+        print(f"  {self.simbolos['luz_encendida']} = Luz encendida")
         print(f"  {self.simbolos['robot']} = Robot")
-        print(f"  {self.simbolos['robot_on_light']} = Robot en luz encendida")
+        print(f"  {self.simbolos['robot_en_luz']} = Robot en luz encendida")
         print()
         print("Comandos de movimiento:")
         print("  1 = ARRIBA, 2 = ABAJO, 3 = IZQUIERDA, 4 = DERECHA, 5 = ENCENDER")
@@ -122,10 +122,10 @@ class Renderizador:
         print()
 
     # Muestra el calculo de la heuristica para un nodo dado
-    def mostrar_explicacion_heuristica(self, nodo, light_positions):
-        luces_apagadas = sum(1 for luz in nodo.lights if luz == 0)
+    def mostrar_explicacion_heuristica(self, nodo, posiciones_luces):
+        luces_apagadas = sum(1 for luz in nodo.luces if luz == 0)
         print(f"\nCALCULO DE HEURISTICA para posicion ({nodo.x}, {nodo.y}):")
-        print(f"   Estado de luces: {nodo.lights}")
+        print(f"   Estado de luces: {nodo.luces}")
         print(f"   Luces apagadas: {luces_apagadas}")
         
         if luces_apagadas == 0:
@@ -136,8 +136,8 @@ class Renderizador:
         distancia_minima = float('inf')
         luz_mas_cercana = None
         
-        for i, (lx, ly) in enumerate(light_positions):
-            if nodo.lights[i] == 0:
+        for i, (lx, ly) in enumerate(posiciones_luces):
+            if nodo.luces[i] == 0:
                 distancia = abs(nodo.x - lx) + abs(nodo.y - ly)
                 if distancia < distancia_minima:
                     distancia_minima = distancia
@@ -146,14 +146,14 @@ class Renderizador:
         print(f"   Luz mas cercana: {luz_mas_cercana}")
         print(f"   Distancia minima: {distancia_minima}")
         print(f"   h(n) = {luces_apagadas} + {distancia_minima} = {luces_apagadas + distancia_minima}")
-        print(f"   g(n) = {nodo.cost}, f(n) = g(n) + h(n) = {nodo.cost + luces_apagadas + distancia_minima}")
+        print(f"   g(n) = {nodo.costo}, f(n) = g(n) + h(n) = {nodo.costo + luces_apagadas + distancia_minima}")
         return luces_apagadas + distancia_minima
 
     # Obtiene una descripcion resumida de los movimientos realizados
-    def _obtener_descripcion_movimientos(self, visited_nodes):
-        if not visited_nodes:
+    def _obtener_descripcion_movimientos(self, nodos_visitados):
+        if not nodos_visitados:
             return "No hay movimientos para analizar"
-        coste_total = visited_nodes[-1].cost if visited_nodes else 0
+        coste_total = nodos_visitados[-1].costo if nodos_visitados else 0
         return f"Coste total: {coste_total}"
 
     # Muestra estadisticas comparativas entre A* y BFS
@@ -164,41 +164,41 @@ class Renderizador:
         print()
         
         print("A* (Heuristica - Algoritmo Informado):")
-        print(f"  Nodos explorados: {resultado_astar['nodes_explored']}")
-        print(f"  Pasos solucion: {resultado_astar['steps']}")
-        print(f"  Tiempo: {resultado_astar['execution_time']:.2f}ms")
+        print(f"  Nodos explorados: {resultado_astar['nodos_explorados']}")
+        print(f"  Pasos solucion: {resultado_astar['pasos']}")
+        print(f"  Tiempo: {resultado_astar['tiempo_ejecucion']:.2f}ms")
         print()
         
         # Mostrar descripción de movimientos para A*
-        if resultado_astar['visited_nodes']:
-            descripcion = self._obtener_descripcion_movimientos(resultado_astar['visited_nodes'])
+        if resultado_astar['nodos_visitados']:
+            descripcion = self._obtener_descripcion_movimientos(resultado_astar['nodos_visitados'])
             print(f"  {descripcion}")
             print()
 
         
-        self.mostrar_solucion(resultado_astar['path'], "A*")
+        self.mostrar_solucion(resultado_astar['camino'], "A*")
         
         print("BFS (Busqueda Ciega - Sin informacion):")
-        print(f"  Nodos explorados: {resultado_bfs['nodes_explored']}")
-        print(f"  Pasos solucion: {resultado_bfs['steps']}")
-        print(f"  Tiempo: {resultado_bfs['execution_time']:.2f}ms")
+        print(f"  Nodos explorados: {resultado_bfs['nodos_explorados']}")
+        print(f"  Pasos solucion: {resultado_bfs['pasos']}")
+        print(f"  Tiempo: {resultado_bfs['tiempo_ejecucion']:.2f}ms")
         
         # Mostrar descripción de movimientos para BFS
-        if resultado_bfs['visited_nodes']:
-            descripcion = self._obtener_descripcion_movimientos(resultado_bfs['visited_nodes'])
+        if resultado_bfs['nodos_visitados']:
+            descripcion = self._obtener_descripcion_movimientos(resultado_bfs['nodos_visitados'])
             print(f"  {descripcion}")
             print()
         
-        self.mostrar_solucion(resultado_bfs['path'], "BFS")
+        self.mostrar_solucion(resultado_bfs['camino'], "BFS")
         print()
     
-        if resultado_astar['success'] and resultado_bfs['success']:
+        if resultado_astar['exito'] and resultado_bfs['exito']:
             print("=== ANALISIS DE EFICIENCIA ===")
             print()
             
             # Cálculo de eficiencia en nodos
-            nodos_astar = resultado_astar['nodes_explored']
-            nodos_bfs = resultado_bfs['nodes_explored']
+            nodos_astar = resultado_astar['nodos_explorados']
+            nodos_bfs = resultado_bfs['nodos_explorados']
             
             if nodos_bfs > 0:
                 eficiencia_nodos = ((nodos_bfs - nodos_astar) / nodos_bfs) * 100
@@ -207,8 +207,8 @@ class Renderizador:
                 print("No se puede calcular eficiencia en nodos (división por cero)")
             
             # Cálculo de eficiencia en tiempo
-            tiempo_astar = resultado_astar['execution_time']
-            tiempo_bfs = resultado_bfs['execution_time']
+            tiempo_astar = resultado_astar['tiempo_ejecucion']
+            tiempo_bfs = resultado_bfs['tiempo_ejecucion']
             
             if tiempo_bfs > 0 and tiempo_astar > 0:
                 if tiempo_bfs > tiempo_astar:
@@ -243,12 +243,12 @@ class Renderizador:
             print()
 
     # Evalua la solucion ingresada por el usuario
-    def evaluar_solucion_usuario(self, nivel, robot_start, camino_usuario):
+    def evaluar_solucion_usuario(self, nivel, inicio_robot, camino_usuario):
         print("\n" + "="*60)
         print("EVALUANDO TU SOLUCION")
         print("="*60)
-        estado_juego = EstadoJuego(nivel['grid'], robot_start[0], robot_start[1])
-        nodo_actual = estado_juego.get_initial_node()
+        estado_juego = EstadoJuego(nivel['cuadricula'], inicio_robot[0], inicio_robot[1])
+        nodo_actual = estado_juego.obtener_nodo_inicial()
         
         print(f"Secuencia ingresada: {' → '.join(camino_usuario)}")
         print(f"Total de pasos: {len(camino_usuario)}")
@@ -256,11 +256,11 @@ class Renderizador:
         
         for i, accion in enumerate(camino_usuario, 1):
             print(f"  Paso {i}: {accion}")
-            sucesores = estado_juego.get_successors(nodo_actual)
+            sucesores = estado_juego.obtener_sucesores(nodo_actual)
             siguiente_nodo = None
             
             for sucesor in sucesores:
-                if sucesor.action == accion:
+                if sucesor.accion == accion:
                     siguiente_nodo = sucesor
                     break
             
@@ -269,15 +269,15 @@ class Renderizador:
                 return False, len(camino_usuario)
             
             nodo_actual = siguiente_nodo
-            print(f"    Robot en ({nodo_actual.x}, {nodo_actual.y}), luces: {nodo_actual.lights}")
+            print(f"    Robot en ({nodo_actual.x}, {nodo_actual.y}), luces: {nodo_actual.luces}")
         
-        es_meta = estado_juego.is_goal(nodo_actual)
+        es_meta = estado_juego.es_meta(nodo_actual)
         
         if es_meta:
             print(f"\n¡SOLUCION CORRECTA! Todas las luces encendidas en {len(camino_usuario)} pasos")
             return True, len(camino_usuario)
         else:
-            luces_encendidas = sum(nodo_actual.lights)
-            total_luces = len(nodo_actual.lights)
+            luces_encendidas = sum(nodo_actual.luces)
+            total_luces = len(nodo_actual.luces)
             print(f"\nSolucion incompleta. Luces encendidas: {luces_encendidas}/{total_luces}")
             return False, len(camino_usuario)

@@ -5,10 +5,10 @@ from estado import EstadoJuego
 from renderizador import Renderizador
 from a_estrella import AEstrella
 from bfs import BusquedaAnchura
-from niveles import get_level
+from niveles import obtener_nivel
 
 # Limpia la consola
-def clearconsole():
+def limpiar_consola():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class LightBot:
@@ -19,7 +19,7 @@ class LightBot:
 
     # Función principal para jugar el juego
     def jugar(self):
-        clearconsole()
+        limpiar_consola()
         print("LIGHTBOT")
         print("=" * 50)
         
@@ -49,7 +49,7 @@ class LightBot:
 
     # Muestra las instrucciones del juego
     def _mostrar_instrucciones(self):
-        clearconsole()
+        limpiar_consola()
         print("\n" + "=" * 60)
         print("INSTRUCCIONES")
         print("=" * 60)
@@ -66,11 +66,11 @@ class LightBot:
         print("Si el movimiento choca con un obstaculo, el robot no se mueve.")
         print()
         input("Presiona ENTER para volver al menu principal...")
-        clearconsole()
+        limpiar_consola()
 
     # Modo de juego interactivo
     def _jugar(self):
-        clearconsole()
+        limpiar_consola()
         print("\nMODO DE JUEGO - Ingresa tu solucion")
         print("=" * 50)
         
@@ -90,14 +90,14 @@ class LightBot:
             except ValueError:
                 print("Por favor ingresa un numero valido")
         
-        nivel = get_level(nivel_num)
-        robot_x, robot_y = nivel['robot_start']
+        nivel = obtener_nivel(nivel_num)
+        robot_x, robot_y = nivel['inicio_robot']
         
-        clearconsole()
+        limpiar_consola()
         print("\n" + "="*60)
         print("PROBLEMA A RESOLVER")
         print("="*60)
-        self.renderizador.render_level(nivel, robot_x, robot_y)
+        self.renderizador.renderizar_nivel(nivel, robot_x, robot_y)
         
         print("Comandos disponibles:")
         print("  1 = ARRIBA")
@@ -109,15 +109,15 @@ class LightBot:
         print()
         
         camino_usuario = []
-        estado_actual = EstadoJuego(nivel['grid'], robot_x, robot_y)
-        nodo_actual = estado_actual.get_initial_node()
+        estado_actual = EstadoJuego(nivel['cuadricula'], robot_x, robot_y)
+        nodo_actual = estado_actual.obtener_nodo_inicial()
         
         print("Ingresa tu solucion paso a paso:")
         
         while True:
-            clearconsole()
+            limpiar_consola()
             print(f"Paso actual: {len(camino_usuario)}")
-            self.renderizador.render_level(nivel, nodo_actual.x, nodo_actual.y, nodo_actual.lights)
+            self.renderizador.renderizar_nivel(nivel, nodo_actual.x, nodo_actual.y, nodo_actual.luces)
             
             paso = input("Siguiente comando (1-5, 0 para terminar): ").strip()
             
@@ -132,11 +132,11 @@ class LightBot:
                     '5': 'ENCENDER'
                 }
                 accion = acciones[paso]
-                sucesores = estado_actual.get_successors(nodo_actual)
+                sucesores = estado_actual.obtener_sucesores(nodo_actual)
                 siguiente = None
                 
                 for suc in sucesores:
-                    if suc.action == accion:
+                    if suc.accion == accion:
                         siguiente = suc
                         break
                 
@@ -156,10 +156,10 @@ class LightBot:
             print("No ingresaste ninguna solucion.")
             return
         
-        es_correcto = estado_actual.is_goal(nodo_actual)
+        es_correcto = estado_actual.es_meta(nodo_actual)
         pasos_usuario = len(camino_usuario)
         
-        clearconsole()
+        limpiar_consola()
         print("\n" + "="*60)
         print("EVALUANDO TU SOLUCION")
         print("="*60)
@@ -170,15 +170,15 @@ class LightBot:
         if es_correcto:
             print(f"\n¡SOLUCION CORRECTA! Todas las luces encendidas en {pasos_usuario} pasos")
         else:
-            luces_encendidas = sum(nodo_actual.lights)
-            total_luces = len(nodo_actual.lights)
+            luces_encendidas = sum(nodo_actual.luces)
+            total_luces = len(nodo_actual.luces)
             print(f"\nSolucion incompleta. Luces encendidas: {luces_encendidas}/{total_luces}")
         
         input("\nPresiona ENTER para ver las soluciones de los algoritmos...")
         
-        clearconsole()
+        limpiar_consola()
         print("Resolviendo con algoritmos...")
-        estado_juego = EstadoJuego(nivel['grid'], robot_x, robot_y)
+        estado_juego = EstadoJuego(nivel['cuadricula'], robot_x, robot_y)
         
         resolver_astar = AEstrella(estado_juego)
         resultado_astar = resolver_astar.resolver()
@@ -187,7 +187,7 @@ class LightBot:
         resultado_bfs = resolver_bfs.resolver()
         
         # Mostrar comparacion incluyendo solucion del usuario
-        clearconsole()
+        limpiar_consola()
         print("\n" + "="*60)
         print("COMPARACION COMPLETA")
         print("="*60)
@@ -201,11 +201,11 @@ class LightBot:
         self.renderizador.mostrar_estadisticas(resultado_astar, resultado_bfs)
         
         # Mostrar explicacion de la heuristica al final
-        nodo_inicial = estado_juego.get_initial_node()
-        self.renderizador.mostrar_explicacion_heuristica(nodo_inicial, estado_juego.light_positions)
+        nodo_inicial = estado_juego.obtener_nodo_inicial()
+        self.renderizador.mostrar_explicacion_heuristica(nodo_inicial, estado_juego.posiciones_luces)
         
-        if es_correcto and resultado_astar['success']:
-            pasos_optimos = resultado_astar['steps']
+        if es_correcto and resultado_astar['exito']:
+            pasos_optimos = resultado_astar['pasos']
             if pasos_usuario == pasos_optimos:
                 print("¡FELICITACIONES! Encontraste la solucion optima!")
             elif pasos_usuario > pasos_optimos:
@@ -216,11 +216,11 @@ class LightBot:
         if jugar_de_nuevo == 's':
             self._jugar()
         else:
-            clearconsole()
+            limpiar_consola()
 
-def main():
+def principal():
     juego = LightBot()
     juego.jugar()
 
 if __name__ == "__main__":
-    main()
+    principal()

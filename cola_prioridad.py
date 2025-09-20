@@ -2,28 +2,28 @@
 import heapq
 
 class ColaPrioridad:
-    def __init__(self, compare_fn=None):
-        self.items = []
-        self.compare = compare_fn or (lambda a, b: a - b)
-        self.counter = 0  # Para evitar comparaciones entre objetos
+    def __init__(self, funcion_comparacion=None):
+        self.elementos = []
+        self.comparar = funcion_comparacion or (lambda a, b: a - b)
+        self.contador = 0  # Para evitar comparaciones entre objetos
 
     #Agrega un elemento a la cola
-    def enqueue(self, item):
+    def encolar(self, elemento):
         # Usamos el counter para evitar comparaciones entre nodos
-        heapq.heappush(self.items, (item.total_cost, self.counter, item))
-        self.counter += 1
+        heapq.heappush(self.elementos, (elemento.costo_total, self.contador, elemento))
+        self.contador += 1
 
     #Elimina y retorna el elemento con mayor prioridad (menor valor)
-    def dequeue(self):
-        if self.is_empty():
+    def desencolar(self):
+        if self.esta_vacia():
             return None
-        _, _, item = heapq.heappop(self.items)
-        return item
+        _, _, elemento = heapq.heappop(self.elementos)
+        return elemento
 
     # Verifica si la cola esta vacia
-    def is_empty(self):
-        return len(self.items) == 0
+    def esta_vacia(self):
+        return len(self.elementos) == 0
 
     # Retorna el tamaño actual de la cola
-    def size(self):
-        return len(self.items)
+    def tamaño(self):
+        return len(self.elementos)

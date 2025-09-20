@@ -1,48 +1,48 @@
 """ Clase que representa un nodo en el espacio de estados del juego LightBot """
 class Nodo:
-    def __init__(self, x, y, lights, parent=None, action=None, cost=0):
+    def __init__(self, x, y, luces, padre=None, accion=None, costo=0):
         self.x = x                    # Posicion X del robot
         self.y = y                    # Posicion Y del robot
-        self.lights = tuple(lights)   # Tupla con estado de las luces (0=apagada, 1=encendida)
-        self.parent = parent          # Nodo padre para reconstruir el camino
-        self.action = action          # Accion que llevo a este estado
-        self.cost = cost              # Costo acumulado (g en A*)
-        self.heuristic = 0            # Valor heuristico (h en A*)
-        self.total_cost = 0           # Costo total (f = g + h en A*)
-        self.visited_order = -1       # Orden en que fue visitado
+        self.luces = tuple(luces)     # Tupla con estado de las luces (0=apagada, 1=encendida)
+        self.padre = padre            # Nodo padre para reconstruir el camino
+        self.accion = accion          # Accion que llevo a este estado
+        self.costo = costo            # Costo acumulado (g en A*)
+        self.heuristica = 0           # Valor heuristico (h en A*)
+        self.costo_total = 0          # Costo total (f = g + h en A*)
+        self.orden_visita = -1        # Orden en que fue visitado
 
     # Genera una clave unica para el nodo basada en su estado
-    def get_key(self):
-        return f"{self.x},{self.y},{','.join(map(str, self.lights))}"
+    def obtener_clave(self):
+        return f"{self.x},{self.y},{','.join(map(str, self.luces))}"
 
     # Verifica si dos nodos son iguales en posicion y estado de luces
-    def equals(self, other):
-        return (self.x == other.x and 
-                self.y == other.y and 
-                self.lights == other.lights)
+    def es_igual(self, otro):
+        return (self.x == otro.x and 
+                self.y == otro.y and 
+                self.luces == otro.luces)
 
     # Crea una copia del nodo con posibles modificaciones
-    def copy(self, new_x=None, new_y=None, new_lights=None):
-        if new_x is None:
-            new_x = self.x
-        if new_y is None:
-            new_y = self.y
-        if new_lights is None:
-            new_lights = list(self.lights)
+    def copiar(self, nuevo_x=None, nuevo_y=None, nuevas_luces=None):
+        if nuevo_x is None:
+            nuevo_x = self.x
+        if nuevo_y is None:
+            nuevo_y = self.y
+        if nuevas_luces is None:
+            nuevas_luces = list(self.luces)
         
-        return Nodo(new_x, new_y, new_lights, self.parent, self.action, self.cost)
+        return Nodo(nuevo_x, nuevo_y, nuevas_luces, self.padre, self.accion, self.costo)
 
     # Reconstruye el camino desde el nodo inicial hasta este nodo
-    def get_path(self):
-        path = []
-        current = self
+    def obtener_camino(self):
+        camino = []
+        actual = self
         
-        while current.parent is not None:
-            path.insert(0, current.action)
-            current = current.parent
+        while actual.padre is not None:
+            camino.insert(0, actual.accion)
+            actual = actual.padre
         
-        return path
+        return camino
 
     # Representacion en string del nodo para depuracion
     def __str__(self):
-        return f"Nodo(x={self.x}, y={self.y}, lights={self.lights}, cost={self.cost})"
+        return f"Nodo(x={self.x}, y={self.y}, luces={self.luces}, costo={self.costo})"

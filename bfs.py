@@ -14,7 +14,7 @@ class BusquedaAnchura:
         self.nodos_visitados = []
         tiempo_inicio = time.perf_counter()
         
-        nodo_inicial = self.estado_juego.get_initial_node()
+        nodo_inicial = self.estado_juego.obtener_nodo_inicial()
         cola = deque([nodo_inicial])
         visitados = set()
         contador_visitas = 0
@@ -23,44 +23,44 @@ class BusquedaAnchura:
             nodo_actual = cola.popleft()
             self.nodos_explorados += 1
             contador_visitas += 1
-            nodo_actual.visited_order = contador_visitas
+            nodo_actual.orden_visita = contador_visitas
             self.nodos_visitados.append(nodo_actual)
 
             # Verificar si llegamos al objetivo
-            if self.estado_juego.is_goal(nodo_actual):
+            if self.estado_juego.es_meta(nodo_actual):
                 tiempo_fin = time.perf_counter()
                 return {
-                    'success': True,
-                    'path': nodo_actual.get_path(),
-                    'nodes_explored': self.nodos_explorados,
-                    'execution_time': (tiempo_fin - tiempo_inicio) * 1000,
-                    'steps': nodo_actual.cost,
-                    'visited_nodes': self.nodos_visitados,
-                    'final_node': nodo_actual
+                    'exito': True,
+                    'camino': nodo_actual.obtener_camino(),
+                    'nodos_explorados': self.nodos_explorados,
+                    'tiempo_ejecucion': (tiempo_fin - tiempo_inicio) * 1000,
+                    'pasos': nodo_actual.costo,
+                    'nodos_visitados': self.nodos_visitados,
+                    'nodo_final': nodo_actual
                 }
 
-            clave_actual = nodo_actual.get_key()
+            clave_actual = nodo_actual.obtener_clave()
             if clave_actual in visitados:
                 continue
             
             visitados.add(clave_actual)
 
             # Generar sucesores
-            sucesores = self.estado_juego.get_successors(nodo_actual)
+            sucesores = self.estado_juego.obtener_sucesores(nodo_actual)
             
             for sucesor in sucesores:
-                clave_sucesor = sucesor.get_key()
+                clave_sucesor = sucesor.obtener_clave()
                 
                 if clave_sucesor not in visitados:
                     cola.append(sucesor)
 
         tiempo_fin = time.perf_counter()
         return {
-            'success': False,
-            'path': [],
-            'nodes_explored': self.nodos_explorados,
-            'execution_time': (tiempo_fin - tiempo_inicio) * 1000,
-            'steps': 0,
-            'visited_nodes': self.nodos_visitados,
-            'final_node': None
+            'exito': False,
+            'camino': [],
+            'nodos_explorados': self.nodos_explorados,
+            'tiempo_ejecucion': (tiempo_fin - tiempo_inicio) * 1000,
+            'pasos': 0,
+            'nodos_visitados': self.nodos_visitados,
+            'nodo_final': None
         }
