@@ -1,6 +1,4 @@
-"""
-Implementacion del algoritmo A*
-"""
+""" Implementacion del algoritmo A* """
 import time
 from cola_prioridad import ColaPrioridad
 
@@ -10,8 +8,8 @@ class AEstrella:
         self.nodos_explorados = 0
         self.nodos_visitados = []
 
+    #Ejecuta el algoritmo A* para encontrar la solucion
     def resolver(self):
-        """Ejecuta el algoritmo A* para encontrar la solucion"""
         self.nodos_explorados = 0
         self.nodos_visitados = []
         tiempo_inicio = time.perf_counter()

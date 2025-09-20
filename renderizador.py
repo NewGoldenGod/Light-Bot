@@ -1,10 +1,8 @@
-"""
-Clase para mostrar el estado del juego en consola
-"""
-
+""" Clase para mostrar el estado del juego en consola """
 from estado import EstadoJuego
 
 class Renderizador:
+    # Inicializa los simbolos para cada tipo de celda
     def __init__(self):
         self.simbolos = {
             0: '.',  # Piso normal
@@ -15,13 +13,12 @@ class Renderizador:
             'robot_on_light': '@'  # Robot en luz encendida
         }
 
+    # Renderiza el nivel en consola
     def render_level(self, nivel, robot_x, robot_y, light_states=None):
-        """Renderiza un nivel en la consola"""
         grid = nivel['grid']
         filas = len(grid)
         columnas = len(grid[0])
         
-        # Si no se proporcionan estados de luces, todas estan apagadas
         if light_states is None:
             light_count = self._contar_luces(grid)
             light_states = [0] * light_count
@@ -46,11 +43,10 @@ class Renderizador:
         print()
         self._mostrar_leyenda()
 
+    # Obtiene el simbolo adecuado para una celda
     def _get_cell_symbol(self, cell_type, row, col, robot_x, robot_y, light_states, grid):
-        """Determina el simbolo a mostrar en una celda"""
-        # Si el robot esta aqui
         if row == robot_x and col == robot_y:
-            if cell_type == 2:  # Robot en una luz
+            if cell_type == 2:
                 light_index = self._get_light_index(row, col, grid)
                 if light_index is not None and light_states[light_index] == 1:
                     return self.simbolos['robot_on_light']
@@ -59,7 +55,6 @@ class Renderizador:
             else:
                 return self.simbolos['robot']
         else:
-            # Celda sin robot
             if cell_type == 0:
                 return self.simbolos[0]
             elif cell_type == 1:
@@ -71,16 +66,16 @@ class Renderizador:
                 else:
                     return self.simbolos[2]
 
+    # Obtiene el indice de la luz en la lista de estados
     def _get_light_index(self, row, col, grid):
-        """Obtiene el indice de una luz en las posiciones de luces"""
         light_positions = self._get_light_positions(grid)
         for i, (lx, ly) in enumerate(light_positions):
             if lx == row and ly == col:
                 return i
         return None
 
+    # Obtiene las posiciones de todas las luces en el nivel
     def _get_light_positions(self, grid):
-        """Obtiene todas las posiciones de luces en el nivel"""
         positions = []
         for i in range(len(grid)):
             for j in range(len(grid[0])):
@@ -88,8 +83,8 @@ class Renderizador:
                     positions.append((i, j))
         return positions
 
+    # Cuenta cuantas luces hay en el nivel
     def _contar_luces(self, grid):
-        """Cuenta el numero total de luces en el nivel"""
         count = 0
         for i in range(len(grid)):
             for j in range(len(grid[0])):
@@ -97,8 +92,8 @@ class Renderizador:
                     count += 1
         return count
 
+    # Muestra la leyenda de simbolos
     def _mostrar_leyenda(self):
-        """Muestra la leyenda de simbolos"""
         print("Leyenda:")
         print(f"  {self.simbolos[0]} = Piso normal")
         print(f"  {self.simbolos[1]} = Obstaculo")
@@ -111,10 +106,8 @@ class Renderizador:
         print("  1 = ARRIBA, 2 = ABAJO, 3 = IZQUIERDA, 4 = DERECHA, 5 = ENCENDER")
         print()
 
-
-
+    # Muestra la solucion encontrada
     def mostrar_solucion(self, camino, nombre_algoritmo=""):
-        """Muestra la solucion encontrada"""
         if not camino:
             print("El robot ya esta en la meta!")
             return
@@ -124,15 +117,13 @@ class Renderizador:
         else:
             print("Solucion encontrada:")
         
-        # Mostrar paso a paso (sin la secuencia con flechas)
         for i, paso in enumerate(camino, 1):
             print(f"  {i}. {paso}")
         print()
 
+    # Muestra el calculo de la heuristica para un nodo dado
     def mostrar_explicacion_heuristica(self, nodo, light_positions):
-        """Muestra el calculo detallado de la heuristica"""
         luces_apagadas = sum(1 for luz in nodo.lights if luz == 0)
-        
         print(f"\nCALCULO DE HEURISTICA para posicion ({nodo.x}, {nodo.y}):")
         print(f"   Estado de luces: {nodo.lights}")
         print(f"   Luces apagadas: {luces_apagadas}")
@@ -156,20 +147,17 @@ class Renderizador:
         print(f"   Distancia minima: {distancia_minima}")
         print(f"   h(n) = {luces_apagadas} + {distancia_minima} = {luces_apagadas + distancia_minima}")
         print(f"   g(n) = {nodo.cost}, f(n) = g(n) + h(n) = {nodo.cost + luces_apagadas + distancia_minima}")
-        
         return luces_apagadas + distancia_minima
 
+    # Obtiene una descripcion resumida de los movimientos realizados
     def _obtener_descripcion_movimientos(self, visited_nodes):
-        """Genera una descripción de los movimientos realizados"""
         if not visited_nodes:
             return "No hay movimientos para analizar"
-        
-        # Solo mostrar el coste total
         coste_total = visited_nodes[-1].cost if visited_nodes else 0
         return f"Coste total: {coste_total}"
 
+    # Muestra estadisticas comparativas entre A* y BFS
     def mostrar_estadisticas(self, resultado_astar, resultado_bfs):
-        """Muestra las estadisticas de comparacion"""
         print("\n" + "="*60)
         print("COMPARACION DE ALGORITMOS")
         print("="*60)
@@ -254,13 +242,11 @@ class Renderizador:
             
             print()
 
+    # Evalua la solucion ingresada por el usuario
     def evaluar_solucion_usuario(self, nivel, robot_start, camino_usuario):
-        """Evalua si la solucion del usuario es correcta"""
         print("\n" + "="*60)
         print("EVALUANDO TU SOLUCION")
         print("="*60)
-        
-        # Simular la ejecucion de la solucion del usuario
         estado_juego = EstadoJuego(nivel['grid'], robot_start[0], robot_start[1])
         nodo_actual = estado_juego.get_initial_node()
         
@@ -270,8 +256,6 @@ class Renderizador:
         
         for i, accion in enumerate(camino_usuario, 1):
             print(f"  Paso {i}: {accion}")
-            
-            # Intentar ejecutar la accion
             sucesores = estado_juego.get_successors(nodo_actual)
             siguiente_nodo = None
             
@@ -287,7 +271,6 @@ class Renderizador:
             nodo_actual = siguiente_nodo
             print(f"    Robot en ({nodo_actual.x}, {nodo_actual.y}), luces: {nodo_actual.lights}")
         
-        # Verificar si se alcanzo la meta
         es_meta = estado_juego.is_goal(nodo_actual)
         
         if es_meta:

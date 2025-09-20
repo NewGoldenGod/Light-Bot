@@ -1,5 +1,3 @@
-@echo off
-
 REM Ejecutar el juego
 python lightbot.py
 

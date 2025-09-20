@@ -1,6 +1,4 @@
-"""
-Implementacion del algoritmo BFS (Busqueda en Anchura)
-"""
+""" Implementacion del algoritmo BFS (Busqueda en Anchura) """
 import time
 from collections import deque
 
@@ -10,8 +8,8 @@ class BusquedaAnchura:
         self.nodos_explorados = 0
         self.nodos_visitados = []
 
+    #Ejecuta el algoritmo BFS para encontrar la solucion
     def resolver(self):
-        """Ejecuta el algoritmo BFS para encontrar la solucion"""
         self.nodos_explorados = 0
         self.nodos_visitados = []
         tiempo_inicio = time.perf_counter()
@@ -28,7 +26,7 @@ class BusquedaAnchura:
             nodo_actual.visited_order = contador_visitas
             self.nodos_visitados.append(nodo_actual)
 
-            # Verificar si llegamos to the goal
+            # Verificar si llegamos al objetivo
             if self.estado_juego.is_goal(nodo_actual):
                 tiempo_fin = time.perf_counter()
                 return {

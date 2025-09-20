@@ -1,6 +1,4 @@
-"""
-Juego LightBot
-"""
+""" Juego LightBot """
 import os
 import time
 from estado import EstadoJuego
@@ -9,8 +7,8 @@ from a_estrella import AEstrella
 from bfs import BusquedaAnchura
 from niveles import get_level
 
+# Limpia la consola
 def clearconsole():
-    """Clear the console screen"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class LightBot:
@@ -19,8 +17,8 @@ class LightBot:
         self.nivel_actual = None
         self.estado_juego = None
 
+    # Función principal para jugar el juego
     def jugar(self):
-        """Inicia el juego principal"""
         clearconsole()
         print("LIGHTBOT")
         print("=" * 50)
@@ -39,8 +37,8 @@ class LightBot:
             else:
                 print("Opcion invalida. Intenta de nuevo.")
 
+    # Muestra el menu principal
     def _mostrar_menu(self):
-        """Muestra el menú principal"""
         print("\n" + "=" * 50)
         print("MENU PRINCIPAL")
         print("=" * 50)
@@ -49,8 +47,8 @@ class LightBot:
         print("3. Salir")
         print()
 
+    # Muestra las instrucciones del juego
     def _mostrar_instrucciones(self):
-        """Muestra las instrucciones del juego"""
         clearconsole()
         print("\n" + "=" * 60)
         print("INSTRUCCIONES")
@@ -70,8 +68,8 @@ class LightBot:
         input("Presiona ENTER para volver al menu principal...")
         clearconsole()
 
+    # Modo de juego interactivo
     def _jugar(self):
-        """Modo donde el usuario juega"""
         clearconsole()
         print("\nMODO DE JUEGO - Ingresa tu solucion")
         print("=" * 50)
@@ -95,7 +93,6 @@ class LightBot:
         nivel = get_level(nivel_num)
         robot_x, robot_y = nivel['robot_start']
         
-        # Mostrar el problema completo
         clearconsole()
         print("\n" + "="*60)
         print("PROBLEMA A RESOLVER")
@@ -111,7 +108,6 @@ class LightBot:
         print("  0 = TERMINAR")
         print()
         
-        # Solicitar solucion del usuario con visualización en tiempo real
         camino_usuario = []
         estado_actual = EstadoJuego(nivel['grid'], robot_x, robot_y)
         nodo_actual = estado_actual.get_initial_node()
@@ -128,7 +124,6 @@ class LightBot:
             if paso == '0':
                 break
             elif paso in ['1', '2', '3', '4', '5']:
-                # Convertir numero a accion
                 acciones = {
                     '1': 'ARRIBA',
                     '2': 'ABAJO', 
@@ -137,8 +132,6 @@ class LightBot:
                     '5': 'ENCENDER'
                 }
                 accion = acciones[paso]
-                
-                # Ejecutar la acción
                 sucesores = estado_actual.get_successors(nodo_actual)
                 siguiente = None
                 
@@ -163,7 +156,6 @@ class LightBot:
             print("No ingresaste ninguna solucion.")
             return
         
-        # Evaluar la solucion del usuario
         es_correcto = estado_actual.is_goal(nodo_actual)
         pasos_usuario = len(camino_usuario)
         
@@ -184,7 +176,6 @@ class LightBot:
         
         input("\nPresiona ENTER para ver las soluciones de los algoritmos...")
         
-        # Resolver con algoritmos
         clearconsole()
         print("Resolviendo con algoritmos...")
         estado_juego = EstadoJuego(nivel['grid'], robot_x, robot_y)
@@ -228,7 +219,6 @@ class LightBot:
             clearconsole()
 
 def main():
-    """Funcion principal"""
     juego = LightBot()
     juego.jugar()
 

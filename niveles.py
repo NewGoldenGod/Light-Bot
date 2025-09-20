@@ -1,10 +1,4 @@
-"""
-Definición de los niveles del juego
-0: Piso normal
-1: Obstáculo
-2: Luz (objetivo)
-"""
-
+# Definiciones de niveles para LightBot
 LEVELS = {
     1: {
         'grid': [
@@ -43,6 +37,6 @@ LEVELS = {
     }
 }
 
+# Retorna el nivel correspondiente al numero dado
 def get_level(level_number):
-    """Obtiene la configuración de un nivel específico"""
     return LEVELS.get(level_number, LEVELS[1])

@@ -1,7 +1,4 @@
-"""
-Clase que representa un nodo en el espacio de estados del juego LightBot
-"""
-
+""" Clase que representa un nodo en el espacio de estados del juego LightBot """
 class Nodo:
     def __init__(self, x, y, lights, parent=None, action=None, cost=0):
         self.x = x                    # Posicion X del robot
@@ -14,18 +11,18 @@ class Nodo:
         self.total_cost = 0           # Costo total (f = g + h en A*)
         self.visited_order = -1       # Orden en que fue visitado
 
+    # Genera una clave unica para el nodo basada en su estado
     def get_key(self):
-        """Genera una clave unica para este estado"""
         return f"{self.x},{self.y},{','.join(map(str, self.lights))}"
 
+    # Verifica si dos nodos son iguales en posicion y estado de luces
     def equals(self, other):
-        """Verifica si dos nodos representan el mismo estado"""
         return (self.x == other.x and 
                 self.y == other.y and 
                 self.lights == other.lights)
 
+    # Crea una copia del nodo con posibles modificaciones
     def copy(self, new_x=None, new_y=None, new_lights=None):
-        """Crea una copia del nodo con nuevos valores"""
         if new_x is None:
             new_x = self.x
         if new_y is None:
@@ -35,8 +32,8 @@ class Nodo:
         
         return Nodo(new_x, new_y, new_lights, self.parent, self.action, self.cost)
 
+    # Reconstruye el camino desde el nodo inicial hasta este nodo
     def get_path(self):
-        """Reconstruye el camino desde el nodo inicial hasta este nodo"""
         path = []
         current = self
         
@@ -46,5 +43,6 @@ class Nodo:
         
         return path
 
+    # Representacion en string del nodo para depuracion
     def __str__(self):
         return f"Nodo(x={self.x}, y={self.y}, lights={self.lights}, cost={self.cost})"
